@@ -67,5 +67,13 @@ def initialize_database(conn: sqlite3.Connection) -> None:
     """)
     conn.commit()
     
-if __name__ == "__main__":
-    get_connection().close()
+def get_all_leden() -> list[Lid]:
+    leden=[]
+    with get_connection() as conn:
+        cursor= conn.cursor()
+        cursor.execute("SELECT * FROM leden ORDER BY achternaam, voornaam")
+        rows= cursor.fetchall()
+        for row in rows:
+            leden.append(convert_lid_row_to_object(row))
+    return leden
+
