@@ -135,3 +135,10 @@ def save_lid(lid: Lid) -> int:
         conn.commit()
         conn.close()
         return int(lid_id)
+    
+def delete_lid(lid_id: int) -> None:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM leden WHERE id = ?", (lid_id,))
+    conn.commit()
+    conn.close()
