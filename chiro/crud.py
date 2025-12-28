@@ -7,6 +7,10 @@ Created on Sun Dec 28 20:18:40 2025
 
 import db.database as database  
 from model.lid import Lid
+import sys
+import csv
+from pathlib import Path
+
 
 
 def toon_alle_leden() -> None:
@@ -94,14 +98,79 @@ def verwijder_lid() -> None:
         print("Geen lid gevonden met dit id.")
         return
 
-    confirm = input(
+    bevestigen = input(
         f"Typ 'ja' als je zeker bent dat je {bestaand.voornaam} {bestaand.achternaam} wil verwijderen: "
     ).strip().lower()
 
-    if confirm != "ja":
+    if bevestigen != "ja":
         print("Verwijderen geannuleerd")
         return
 
     database.delete_lid(lid_id)
     print("Lid verwijderd.")
+
+def exporteer_leden_naar_csv() -> None:
+    leden = database.get_all_leden()
+    if len(leden) == 0:
+        print("Geen leden om te exporteren.")
+        return
+
+    export_map = Path("exports")
+    export_map.mkdir(parents=True, exist_ok=True)
+    uitvoer_pad = export_map / "leden.csv"
+
+    with uitvoer_pad.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["id", "voornaam", "achternaam", "afdeling"])
+        writer.writeheader()
+        writer.writerows(
+            {
+                "id": l.id,
+                "voornaam": l.voornaam,
+                "achternaam": l.achternaam,
+                "afdeling": l.afdeling,
+            }
+            for l in leden
+        )  
+
+    print(f"CSV geëxporteerd naar: {uitvoer_pad}")
+
+
+def programma_verlaten() -> None:
+    sys.exit(0)  
+
+
+def menu() -> None:
+    while True:
+        print(
+            """
+1. Toon alle leden
+2. Zoek lid op id
+3. Zoek leden op naam
+4. Voeg lid toe
+5. Wijzig lid
+6. Verwijder lid
+7. Exporteer leden naar CSV
+8. Programma afsluiten
+"""
+        )
+
+        keuze = input("Kies een optie (1-8): ").strip()
+        if keuze == "1":
+            toon_alle_leden()
+        elif keuze == "2":
+            toon_lid_op_id()
+        elif keuze == "3":
+            zoek_leden_op_naam()
+        elif keuze == "4":
+            voeg_lid_toe()
+        elif keuze == "5":
+            wijzig_lid()
+        elif keuze == "6":
+            verwijder_lid()
+        elif keuze == "7":
+            exporteer_leden_naar_csv()
+        elif keuze == "8":
+            programma_verlaten()
+        else:
+            print("Ongeldige keuze. Kies een nummer van 1 t.e.m. 8.")
 
