@@ -77,3 +77,31 @@ def get_all_leden() -> list[Lid]:
             leden.append(convert_lid_row_to_object(row))
     return leden
 
+def get_lid_by_id(lid_id: int) -> Lid | None:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT * FROM leden WHERE id = ?",
+        (lid_id,)
+    )  
+    row = cursor.fetchone()
+    conn.close()
+    return convert_lid_row_to_object(row) if row else None
+
+def get_leden_by_naam(naam: str) -> list[Lid]:
+    leden = []
+    like = f"%{naam.strip().lower()}%"
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT * FROM leden
+            WHERE LOWER(voornaam) LIKE ? OR LOWER(achternaam) LIKE ?
+            ORDER BY achternaam, voornaam
+            """,
+            (like, like)
+        )
+        rows = cursor.fetchall()
+        leden = [convert_lid_row_to_object(r) for r in rows]
+    return leden
+
