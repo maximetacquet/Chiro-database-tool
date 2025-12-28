@@ -105,3 +105,33 @@ def get_leden_by_naam(naam: str) -> list[Lid]:
         leden = [convert_lid_row_to_object(r) for r in rows]
     return leden
 
+def save_lid(lid: Lid) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    lid_id = getattr(lid, "id", None)
+
+    if lid_id in (None, 0):
+        cursor.execute(
+            """
+            INSERT INTO leden (voornaam, achternaam, afdeling)
+            VALUES (?, ?, ?)
+            """,
+            (lid.voornaam, lid.achternaam, lid.afdeling)
+        )
+        conn.commit()
+        nieuwe_id = cursor.lastrowid
+        conn.close()
+        return int(nieuwe_id)
+    else:
+        cursor.execute(
+            """
+            UPDATE leden
+            SET voornaam = ?, achternaam = ?, afdeling = ?
+            WHERE id = ?
+            """,
+            (lid.voornaam, lid.achternaam, lid.afdeling, lid_id)
+        )
+        conn.commit()
+        conn.close()
+        return int(lid_id)
