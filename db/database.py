@@ -10,7 +10,7 @@ import logging
 from pathlib import Path
 from environs import Env
 from model.lid import Lid
-from model.afdeling import 
+from model.afdeling import Afdelingen
 
 project_root = Path(__file__).resolve().parent.parent
 
@@ -36,7 +36,7 @@ def convert_lid_row_to_object(lid_row: tuple) -> Lid:
         id=lid_row[0],
         voornaam=lid_row[1],
         achternaam=lid_row[2],
-        afdeling=lid_row[3]
+        afdeling_id=lid_row[3]
     )
 
 def get_connection() -> sqlite3.Connection:
@@ -89,7 +89,7 @@ def get_all_leden() -> list[Lid]:
     leden=[]
     with get_connection() as conn:
         cursor= conn.cursor()
-        cursor.execute("SELECT * FROM leden ORDER BY achternaam, voornaam")
+        cursor.execute("SELECT * FROM leden ORDER BY id ASC")
         rows= cursor.fetchall()
         for row in rows:
             leden.append(convert_lid_row_to_object(row))
@@ -135,7 +135,7 @@ def save_lid(lid: Lid) -> int:
             INSERT INTO leden (voornaam, achternaam, afdeling_id)
             VALUES (?, ?, ?)
             """,
-            (lid.voornaam, lid.achternaam, lid.afdeling)
+            (lid.voornaam, lid.achternaam, int(lid.afdeling_id))
         )
         conn.commit()
         nieuwe_id = cursor.lastrowid
@@ -148,11 +148,12 @@ def save_lid(lid: Lid) -> int:
             SET voornaam = ?, achternaam = ?, afdeling_id = ?
             WHERE id = ?
             """,
-            (lid.voornaam, lid.achternaam, lid.afdeling, lid_id)
+            (lid.voornaam, lid.achternaam, int(lid.afdeling_id), lid_id)
         )
         conn.commit()
         conn.close()
         return int(lid_id)
+
     
 def delete_lid(lid_id: int) -> None:
     conn = get_connection()
