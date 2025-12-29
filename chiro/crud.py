@@ -150,6 +150,25 @@ def verwijder_lid() -> None:
     database.delete_lid(lid_id)
     print("Lid verwijderd.")
 
+def toon_afdelingen() -> None:
+    print("Beschikbare afdelingen:")
+    for afd_id, naam in Afdelingen.items():
+        print(f"{afd_id}. {naam}")
+        
+def toon_leden_van_afdeling() -> None:
+    afd_id = _kies_afdeling_id()
+    afd_naam = Afdelingen.get(afd_id, f"Onbekend ({afd_id})")
+
+    leden = database.get_all_leden()
+    leden_in_afdeling = [l for l in leden if l.afdeling_id == afd_id]
+
+    if len(leden_in_afdeling) == 0:
+        print(f"Geen leden gevonden in afdeling: {afd_naam}")
+        return
+
+    print(f"Leden in afdeling: {afd_naam}")
+    for lid in leden_in_afdeling:
+        print(f"{lid.id}: {lid.voornaam} {lid.achternaam}")
 
 def exporteer_leden_naar_csv() -> None:
     leden = database.get_all_leden()
@@ -177,7 +196,6 @@ def exporteer_leden_naar_csv() -> None:
 
     print(f"CSV geëxporteerd naar: {uitvoer_pad}")
 
-
 def programma_verlaten() -> None:
     sys.exit(0)
 
@@ -192,12 +210,14 @@ def menu() -> None:
 4. Voeg lid toe
 5. Wijzig lid
 6. Verwijder lid
-7. Exporteer leden naar CSV
-8. Programma afsluiten
+7. Toon alle afdelingen
+8. Toon alle leden van een afdeling
+9. Exporteer leden naar CSV
+10. Programma afsluiten
 """
         )
 
-        keuze = input("Kies een optie (1-8): ").strip()
+        keuze = input("Kies een optie (1-10): ").strip()
         if keuze == "1":
             toon_alle_leden()
         elif keuze == "2":
@@ -211,8 +231,12 @@ def menu() -> None:
         elif keuze == "6":
             verwijder_lid()
         elif keuze == "7":
+            toon_afdelingen()
+        elif keuze =="8":
+            toon_leden_van_afdeling()
+        elif keuze =="9":
             exporteer_leden_naar_csv()
-        elif keuze == "8":
+        elif keuze == "10":
             programma_verlaten()
         else:
-            print("Ongeldige keuze. Kies een nummer van 1 t.e.m. 8.")
+            print("Ongeldige keuze. Kies een nummer van 1 t.e.m. 10.")
