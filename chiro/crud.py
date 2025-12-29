@@ -13,14 +13,14 @@ from model.lid import Lid
 from model.afdeling import Afdelingen
 
 
-def _toon_afdelingen() -> None:
+def toon_afdelingen() -> None:
     print("Beschikbare afdelingen:")
     for afd_id, naam in Afdelingen.items():
         print(f"{afd_id}. {naam}")
 
 
 def _kies_afdeling_id(huidig: int | None = None) -> int:
-    _toon_afdelingen()
+    toon_afdelingen()
 
     prompt = "Kies afdeling id"
     if huidig is not None:
@@ -150,10 +150,7 @@ def verwijder_lid() -> None:
     database.delete_lid(lid_id)
     print("Lid verwijderd.")
 
-def toon_afdelingen() -> None:
-    print("Beschikbare afdelingen:")
-    for afd_id, naam in Afdelingen.items():
-        print(f"{afd_id}. {naam}")
+
         
 def toon_leden_van_afdeling() -> None:
     afd_id = _kies_afdeling_id()
