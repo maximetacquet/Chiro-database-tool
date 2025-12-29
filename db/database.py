@@ -10,6 +10,7 @@ import logging
 from pathlib import Path
 from environs import Env
 from model.lid import Lid
+from model.afdeling import 
 
 project_root = Path(__file__).resolve().parent.parent
 
@@ -57,14 +58,31 @@ def get_connection() -> sqlite3.Connection:
 
 def initialize_database(conn: sqlite3.Connection) -> None:
     cursor = conn.cursor()
+    # tabel afdelingen
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS afdelingen (
+            id INTEGER PRIMARY KEY,
+            naam TEXT NOT NULL
+        );
+    """)           
+                   
+    
+    # tabel leden
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS leden (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             voornaam TEXT NOT NULL,
             achternaam TEXT NOT NULL,
-            afdeling TEXT NOT NULL
+            afdeling_id INTEGER NOT NULL
         );
     """)
+    
+    for afd_id, naam in Afdelingen.items():
+        cursor.execute(
+            "INSERT OR IGNORE INTO afdelingen (id, naam) VALUES (?, ?);",
+            (afd_id, naam)
+        )
+    
     conn.commit()
     
 def get_all_leden() -> list[Lid]:
@@ -114,7 +132,7 @@ def save_lid(lid: Lid) -> int:
     if lid_id in (None, 0):
         cursor.execute(
             """
-            INSERT INTO leden (voornaam, achternaam, afdeling)
+            INSERT INTO leden (voornaam, achternaam, afdeling_id)
             VALUES (?, ?, ?)
             """,
             (lid.voornaam, lid.achternaam, lid.afdeling)
@@ -127,7 +145,7 @@ def save_lid(lid: Lid) -> int:
         cursor.execute(
             """
             UPDATE leden
-            SET voornaam = ?, achternaam = ?, afdeling = ?
+            SET voornaam = ?, achternaam = ?, afdeling_id = ?
             WHERE id = ?
             """,
             (lid.voornaam, lid.achternaam, lid.afdeling, lid_id)
