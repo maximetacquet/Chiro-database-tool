@@ -44,5 +44,5 @@ class Lid:
         
         return Afdelingen.get(self.afdeling_id, "")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.voornaam} {self.achternaam} {self.afdeling}"
